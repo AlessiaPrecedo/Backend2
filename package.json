@@ -1,0 +1,23 @@
+{
+  "name": "backend2",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlessiaPrecedo/Backend2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlessiaPrecedo/Backend2/issues"
+  },
+  "homepage": "https://github.com/AlessiaPrecedo/Backend2#readme"
+}
