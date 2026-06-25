@@ -70,7 +70,7 @@ npm run dev
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/tickes` | Obtener todos los tickets |
+| GET | `/tickets` | Obtener todos los tickets |
 | GET | `/tickets/:id` | Obtener ticket por ID |
 | POST | `/tickets` | Crear ticket |
 | PUT | `/tickets/:id` | Actualizar ticket |
