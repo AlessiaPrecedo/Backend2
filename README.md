@@ -21,9 +21,9 @@ Crear un archivo `.env` en la raíz del proyecto:
 
 ```
 PORT=8080
-NODE_ENV =
-MONGO_URL=mongodb://localhost:27017/backend2
-JWT_SECRET =
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/backend2
+JWT_SECRET= Secret
+NODE_ENV=development
 
 ```
 
