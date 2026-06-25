@@ -21,7 +21,10 @@ Crear un archivo `.env` en la raíz del proyecto:
 
 ```
 PORT=8080
+NODE_ENV =
 MONGO_URL=mongodb://localhost:27017/backend2
+JWT_SECRET =
+
 ```
 
 Iniciar el servidor:
