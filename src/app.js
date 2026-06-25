@@ -13,11 +13,11 @@ app.use("/events", eventsRoutes);
 app.use("/tickets", ticketsRoutes);
 app.use("/sessions", sessionsRoutes);
 
-import { errorHandler } from "./middlewares/errorHandler.js";
-app.use(errorHandler);
+import { ErrorHandler } from "./middlewares/ErrorHandler.js";
+app.use(ErrorHandler);
 
 app.listen(env.PORT, async () => {
   await connectDB();
-  console.log("Conexión a la base de datos establecida");
+  console.log("Connected");
   console.log(`Server running on port ${env.PORT}`);
 });

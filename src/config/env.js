@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 if (!process.env.MONGO_URL) {
-  throw new Error("Falta la variable MONGO_URL en el .env");
+  throw new Error("The MONGO_URL variable is missing from the .env file.");
 }
 
 export const env = {

@@ -16,7 +16,7 @@ export const getUserById = async (req, res) => {
     const user = await userService.getUserById(req.params.id);
     res.json({ status: "success", data: user });
   } catch (error) {
-    const statusCode = error.message === "Usuario no encontrado" ? 404 : 500;
+    const statusCode = error.message === "User not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -26,7 +26,7 @@ export const createUser = async (req, res) => {
     const user = await userService.createUser(req.body);
     res.status(201).json({ status: "success", data: user });
   } catch (error) {
-    const statusCode = error.message.includes("Ya existe") ? 400 : 500;
+    const statusCode = error.message.includes("It already exists.") ? 400 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -36,7 +36,7 @@ export const updateUser = async (req, res) => {
     const user = await userService.updateUser(req.params.id, req.body);
     res.json({ status: "success", data: user });
   } catch (error) {
-    const statusCode = error.message === "Usuario no encontrado" ? 404 : 500;
+    const statusCode = error.message === "User not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -46,7 +46,7 @@ export const deleteUser = async (req, res) => {
     const result = await userService.deleteUser(req.params.id);
     res.json({ status: "success", data: result });
   } catch (error) {
-    const statusCode = error.message === "Usuario no encontrado" ? 404 : 500;
+    const statusCode = error.message === "User not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };

@@ -10,7 +10,7 @@ export class TicketService {
   async getTicketByID(Id) {
     const ticket = await ticketRepository.findById(Id);
     if (!ticket) {
-      throw new Error("Ticket no encontrado");
+      throw new Error("Ticket not found");
     }
     return ticket;
   }
@@ -22,7 +22,7 @@ export class TicketService {
   async updateTicket(id, TicketData) {
     const ticket = await ticketRepository.findById(id);
     if (!ticket) {
-      throw new Error("ticket no encontrado");
+      throw new Error("ticket not found");
     }
     const updatedticket = await ticketRepository.update(id, TicketData);
     return updatedticket;
@@ -31,9 +31,9 @@ export class TicketService {
   async deleteTicket(id) {
     const ticket = await ticketRepository.findById(id);
     if (!ticket) {
-      throw new Error("Ticket no encontrado");
+      throw new Error("Ticket not found");
     }
     await ticketRepository.delete(id);
-    return { message: "Ticket eliminado correctamente" };
+    return { message: "User successfully deleted" };
   }
 }

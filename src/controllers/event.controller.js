@@ -16,7 +16,7 @@ export const getEventsById = async (req, res) => {
     const event = await eventService.getEventById(req.params.id);
     res.json({ status: "success", data: event });
   } catch (error) {
-    const statusCode = error.message === "Evento no encontrado" ? 404 : 500;
+    const statusCode = error.message === "Event not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -26,7 +26,7 @@ export const createEvent = async (req, res) => {
     const event = await eventService.createEvent(req.body);
     res.status(201).json({ status: "success", data: event });
   } catch (error) {
-    const statusCode = error.message.includes("Ya existe") ? 400 : 500;
+    const statusCode = error.message.includes("It already exists.") ? 400 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -36,7 +36,7 @@ export const updateEvent = async (req, res) => {
     const event = await eventService.updateEvent(req.params.id, req.body);
     res.json({ status: "success", data: event });
   } catch (error) {
-    const statusCode = error.message === "Evento no encontrado" ? 404 : 500;
+    const statusCode = error.message === "Event not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
@@ -46,7 +46,7 @@ export const deleteEvent = async (req, res) => {
     const result = await eventService.deleteEvent(req.params.id);
     res.json({ status: "success", data: result });
   } catch (error) {
-    const statusCode = error.message === "Evento no encontrado" ? 404 : 500;
+    const statusCode = error.message === "Event not found" ? 404 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };

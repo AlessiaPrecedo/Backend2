@@ -10,7 +10,7 @@ export class UserService {
   async getUserById(id) {
     const user = await userRepository.findById(id);
     if (!user) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("User not found");
     }
     return user;
   }
@@ -18,7 +18,7 @@ export class UserService {
     // Business logic: check if email already exists
     const existingUser = await userRepository.findByEmail(userData.email);
     if (existingUser) {
-      throw new Error("Ya existe un usuario con ese email");
+      throw new Error("A user with that email already exists.");
     }
     const newUser = await userRepository.create(userData);
     return newUser;
@@ -27,7 +27,7 @@ export class UserService {
   async updateUser(id, userData) {
     const user = await userRepository.findById(id);
     if (!user) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("User not found");
     }
     const updatedUser = await userRepository.update(id, userData);
     return updatedUser;
@@ -36,10 +36,10 @@ export class UserService {
   async deleteUser(id) {
     const user = await userRepository.findById(id);
     if (!user) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("User not found");
     }
     await userRepository.delete(id);
-    return { message: "Usuario eliminado correctamente" };
+    return { message: "User successfully deleted" };
   }
 }
 

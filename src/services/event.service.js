@@ -10,7 +10,7 @@ export class EventService {
   async getEventById(id) {
     const Event = await eventRepository.findById(id);
     if (!Event) {
-      throw new Error("Evento no encontrado");
+      throw new Error("Event not found");
     }
     return Event;
   }
@@ -21,7 +21,7 @@ export class EventService {
       eventData.date,
     );
     if (existingEvent) {
-      throw new Error("Ya existe un evento con ese título en esa fecha");
+      throw new Error("An event with that title already exists on that date.");
     }
     const newEvent = await eventRepository.create(eventData);
     return newEvent;
@@ -30,7 +30,7 @@ export class EventService {
   async updateEvent(id, EventData) {
     const event = await eventRepository.findById(id);
     if (!event) {
-      throw new Error("Evento no encontrado");
+      throw new Error("Event not found");
     }
     const updatedEvent = await eventRepository.update(id, EventData);
     return updatedEvent;

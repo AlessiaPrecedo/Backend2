@@ -16,7 +16,7 @@ export const getTicketById = async (req, res) => {
     const ticket = await ticketService.getTicketByID(req.params.id);
     res.json({ status: "success", data: ticket });
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener el ticket" });
+    res.status(500).json({ error: "Error retrieving the ticket" });
   }
 };
 
@@ -38,7 +38,7 @@ export const updateTicket = async (req, res) => {
 
     res.json({ status: "success", data: ticket });
   } catch (error) {
-    res.status(500).json({ error: "Error al actualizar el ticket" });
+    res.status(500).json({ error: "Error updating the ticket" });
   }
 };
 
@@ -47,6 +47,6 @@ export const cancelTicket = async (req, res) => {
     const cancelticket = await ticketService.deleteTicket(req.params.id);
     res.json({ status: "success", data: ticket });
   } catch (error) {
-    res.status(500).json({ error: "Error al cancelar el ticket" });
+    res.status(500).json({ error: "Error cancelling the ticket" });
   }
 };
