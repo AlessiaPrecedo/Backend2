@@ -44,4 +44,35 @@ npm run dev
 | **Service** | Contiene la lógica del negocio (validaciones, reglas) |
 | **Repository** | Único punto de contacto con la base de datos |
 
+## Endpoints
+
+### Usuarios
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/users` | Obtener todos los usuarios |
+| GET | `/users/:id` | Obtener usuario por ID |
+| POST | `/users` | Crear usuario |
+| PUT | `/users/:id` | Actualizar usuario |
+| DELETE | `/users/:id` | Eliminar usuario |
+
+### Eventos
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/events` | Obtener todos los eventos |
+| GET | `/events/:id` | Obtener evento por ID |
+| POST | `/events` | Crear evento |
+| PUT | `/events/:id` | Actualizar evento |
+| DELETE | `/events/:id` | Eliminar evento |
+
+### Tickets
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/tickes` | Obtener todos los tickets |
+| GET | `/tickets/:id` | Obtener ticket por ID |
+| POST | `/tickets` | Crear ticket |
+| PUT | `/tickets/:id` | Actualizar ticket |
+| DELETE | `/tickets/:id` | Eliminar ticket |
 
