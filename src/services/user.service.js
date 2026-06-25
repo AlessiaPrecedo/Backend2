@@ -7,7 +7,7 @@ export class UserService {
     const users = await userRepository.findAll();
     return users;
   }
-  async getUserById(Id) {
+  async getUserById(id) {
     const user = await userRepository.findById(id);
     if (!user) {
       throw new Error("Usuario no encontrado");
