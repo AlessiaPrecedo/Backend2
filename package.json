@@ -19,5 +19,10 @@
   "bugs": {
     "url": "https://github.com/AlessiaPrecedo/Backend2/issues"
   },
-  "homepage": "https://github.com/AlessiaPrecedo/Backend2#readme"
+  "homepage": "https://github.com/AlessiaPrecedo/Backend2#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.2"
+  }
 }

@@ -2,17 +2,19 @@ import { Router } from "express";
 import {
   getEvents,
   createEvent,
-  getEventById,
+  getEventsById,
   updateEvent,
-  cancelEvent,
-} from "../controllers/events.controllers.js";
+  deleteEvent,
+} from "../controllers/event.controller.js";
 
 const router = Router();
 
 router.get("/", getEvents);
 router.post("/", createEvent);
-router.get("/:id", getEventById);
+router.get("/:id", getEventsById);
 router.put("/:id", updateEvent);
-router.delete("/:id", cancelEvent);
+router.delete("/:id", deleteEvent);
 
 export default router;
+
+//ruta de eventos

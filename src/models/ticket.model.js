@@ -18,4 +18,4 @@ const ticketSchema = new Schema(
   { timestamps: true },
 );
 
-export const TicketModel = Model("Ticket", ticketSchema);
+export const TicketModel = model("Ticket", ticketSchema);

@@ -1,10 +1,10 @@
 import express from "express";
 import { env } from "./config/env.js";
 import { connectDB } from "./config/db.js";
-import usersRoutes from "./routes/users.routes.js";
-import eventsRoutes from "./routes/events.routes.js";
-import ticketsRoutes from "./routes/tickets.routes.js";
-import sessionsRoutes from "./routes/session.routes.js";
+import usersRoutes from "./routes/user.route.js";
+import eventsRoutes from "./routes/event.route.js";
+import ticketsRoutes from "./routes/ticket.route.js";
+import sessionsRoutes from "./routes/session.route.js";
 
 const app = express();
 app.use(express.json());
