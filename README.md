@@ -1,50 +1,62 @@
-# Backend2 — API REST con Express y MongoDB
+# Backend2 — Registro seguro de usuarios
 
-API REST construida con Node.js, Express y MongoDB, organizada en arquitectura de 3 capas.
+## Requisitos
 
-## Tecnologías
-
-- Node.js
-- Express
-- MongoDB + Mongoose
-- dotenv
+- Node.js v18+
+- MongoDB (local o Atlas)
 
 ## Instalación
 
 ```bash
-git clone https://github.com/AlessiaPrecedo/Backend2.git
+git clone <tu-repo>
 cd Backend2
 npm install
 ```
 
-Crear un archivo `.env` en la raíz del proyecto:
+## Variables de entorno
 
-```
-PORT=8080
-MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/backend2
-JWT_SECRET= Secret
-NODE_ENV=development
-
-```
-
-Iniciar el servidor:
+Copiá el archivo de ejemplo y completá los valores:
 
 ```bash
-# Producción
-npm start
+cp .env.example .env
+```
 
+```dotenv
+PORT=8080
+NODE_ENV=development
+MONGO_URL=mongodb://localhost:27017/backend2
+JWT_SECRET=unaclavesecretamuylargarandom123
+SALT_ROUNDS=10
+```
+
+## Correr el proyecto
+
+```bash
 # Desarrollo (recarga automática)
 npm run dev
 
-## Arquitectura de 3 capas
+# Producción
+npm start
+```
+
+## Arquitectura en capas
 
 | Capa | Responsabilidad |
 |------|----------------|
+| **Route** | Define el endpoint y aplica middlewares |
 | **Controller** | Recibe el request HTTP, llama al service, devuelve la response |
-| **Service** | Contiene la lógica del negocio (validaciones, reglas) |
+| **Service** | Contiene la lógica de negocio (validaciones, hash, reglas) |
 | **Repository** | Único punto de contacto con la base de datos |
+| **Utils** | Helpers reutilizables (bcrypt, etc.) |
 
 ## Endpoints
+
+### Sesiones
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/sessions/register` | Registro de usuario |
+| POST | `/api/sessions/login` | Login de usuario |
 
 ### Usuarios
 
@@ -75,4 +87,51 @@ npm run dev
 | POST | `/tickets` | Crear ticket |
 | PUT | `/tickets/:id` | Actualizar ticket |
 | DELETE | `/tickets/:id` | Eliminar ticket |
+
+## Endpoint: Registro de usuario
+
+**POST** `/api/sessions/register`
+
+### Body (JSON)
+
+```json
+{
+  "first_name": "Kenny",
+  "last_name": "Test",
+  "email": "kenny@test.com",
+  "password": "abc12345"
+}
+```
+
+### Respuesta exitosa `201`
+
+```json
+{
+  "user": {
+    "_id": "664f...",
+    "first_name": "Kenny",
+    "last_name": "Test",
+    "email": "kenny@test.com",
+    "role": "user"
+  }
+}
+```
+
+> La contraseña no se devuelve en la respuesta, ni en texto plano ni hasheada.
+
+## Casos de prueba
+
+| Caso | Body | Respuesta esperada |
+|---|---|---|
+| Registro exitoso | Todos los campos válidos | `201` con datos del usuario |
+| Campo faltante | Sin `first_name`, por ejemplo | `400` All fields are required |
+| Email inválido | `email: "kenny"` | `400` Invalid email format |
+| Contraseña corta | `password: "abc"` | `400` Password must be at least 8 characters long |
+| Email ya registrado | Mismo email dos veces | `400` User already exists |
+
+## Seguridad
+
+- La contraseña se hashea con `bcrypt` antes de guardarse en MongoDB
+- El `role` no puede manipularse desde el body; siempre se asigna `user` por defecto
+- El email se normaliza (trim + lowercase) antes de guardarse
 
