@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { login, register } from "../controllers/session.controller.js";
-import { userExists } from "../middlewares/session.middleware.js";
+import { userExists } from "../../middlewares/session.middleware.js";
+import { login, register } from "../../controllers/session.controller.js";
 
 const router = Router();
 

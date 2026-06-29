@@ -4,39 +4,25 @@
  * @param {*} next
  */
 
-import { UserService } from "../services/user.service.js";
+import { SessionService } from "../services/session.service.js";
+
+const sessionService = new SessionService();
 
 export async function register(req, res, next) {
   try {
-    const { first_name, last_name, email, password } = req.body;
-    const hashedPassword = await createHash(password);
-    const newUser = await UserModel.create({ email, password: hashedPassword });
-    res.status(201).json({ newUser });
+    const user = await sessionService.register(req.body);
+    res.status(201).json({ user });
   } catch (error) {
-    if (error.code == 11000) {
-      res.status(409).json({ error: "el usuario ya existe" });
-    } else {
-      res.status(406).json({ error: error.erros.email.message });
-    }
+    next(error);
   }
 }
 
 export async function login(req, res, next) {
   try {
-    const { email, password } = req.body;
-    const user = await UserModel.findOne({ email });
-
-    if (isValidPassword(password, user.password)) {
-      const sessionData = {
-        email: user.email,
-        role: user.role,
-      };
-      res.status(200).json(user);
-    } else {
-      res.status(401).json({ message: "Credentials invalid" });
-    }
+    const user = await sessionService.login(req.body.email, req.body.password);
+    res.status(200).json(user);
   } catch (error) {
-    res.status(401).json({ message: "" });
+    next(error);
   }
 }
 // controlador de sessiones a desarrollar

@@ -42,7 +42,7 @@ export class EventService {
       throw new Error("Evento no encontrado");
     }
     await eventRepository.delete(id);
-    return { message: "evento eliminado correctamente" };
+    return { message: "deleted event sussesfully" };
   }
 }
 
