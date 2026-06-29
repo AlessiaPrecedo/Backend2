@@ -28,3 +28,5 @@ export class EventRepository {
     return await EventModel.findByIdAndDelete(id);
   }
 }
+
+//repositorio/tambien podria ser DAO

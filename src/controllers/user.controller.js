@@ -23,13 +23,20 @@ export const getUserById = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const user = await userService.createUser(req.body);
+    const { first_name, last_name, email, password } = req.body;
+    const user = await userService.createUser({
+      first_name,
+      last_name,
+      email,
+      password,
+      role: "user",
+    });
     res.status(201).json({ status: "success", data: user });
   } catch (error) {
     const statusCode = error.message.includes("It already exists.") ? 400 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
-};
+}; //reforce
 
 export const updateUser = async (req, res) => {
   try {
@@ -50,3 +57,4 @@ export const deleteUser = async (req, res) => {
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
+//controlador de usuarios

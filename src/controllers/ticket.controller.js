@@ -50,3 +50,5 @@ export const cancelTicket = async (req, res) => {
     res.status(500).json({ error: "Error cancelling the ticket" });
   }
 };
+
+//controlador de tickets

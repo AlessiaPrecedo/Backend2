@@ -1,4 +1,5 @@
 import { UserRepository } from "../repositories/user.repository.js";
+import { createHash, isValidPassword } from "../utils/utils.js";
 
 const userRepository = new UserRepository();
 
@@ -20,6 +21,10 @@ export class UserService {
     if (existingUser) {
       throw new Error("A user with that email already exists.");
     }
+    userData.email = userData.email.trim().toLowerCase();
+
+    userData.password = await createHash(userData.password);
+
     const newUser = await userRepository.create(userData);
     return newUser;
   }
