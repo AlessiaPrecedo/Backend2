@@ -1,5 +1,7 @@
 import { UserRepository } from "../repositories/user.repository.js";
 import { createHash, isValidPassword } from "../utils/utils.js";
+import { generateToken } from "../utils/jwt.js";
+import { HttpError } from "../utils/errors.js";
 
 const userRepo = new UserRepository();
 
@@ -11,23 +13,23 @@ export class SessionService {
       !userData.email ||
       !userData.password
     ) {
-      throw new Error("All fields are required");
+      throw new HttpError(400, "All fields are required");
     }
     userData.email = userData.email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(userData.email)) {
-      throw new Error("Invalid email format");
+      throw new HttpError(400, "Invalid email format");
     }
 
     if (userData.password.length < 8) {
-      throw new Error("Password must be at least 8 characters long");
+      throw new HttpError(400, "Password must be at least 8 characters long");
     }
 
     const exist = await userRepo.findByEmail(userData.email);
 
     if (exist) {
-      throw new Error("User already exists");
+      throw new HttpError(400, "User already exists");
     }
 
     userData.role = "user"; // impedir manipulación del rol
@@ -42,19 +44,24 @@ export class SessionService {
   }
 
   async login(email, password) {
-    const user = await userRepo.findByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await userRepo.findByEmail(normalizedEmail);
 
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new HttpError(401, "Invalid credentials");
     }
 
     const valid = await isValidPassword(password, user.password);
 
     if (!valid) {
-      throw new Error("Invalid Credentials");
+      throw new HttpError(401, "Invalid Credentials");
     }
-    const { password: _, ...userWithoutPassword } = user.toObject();
+    const token = generateToken({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    });
 
-    return userWithoutPassword;
+    return token;
   }
 }

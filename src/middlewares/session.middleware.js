@@ -1,11 +1,13 @@
 import { UserModel } from "../models/user.model.js";
 
-export async function userExists(req, res, next) {
-  const { email } = req.body;
-  const user = await UserModel.findOne({ email });
+export function validateLoginFields(req, res, next) {
+  const { email, password } = req.body;
 
-  if (user == null)
-    return res.status(401).json({ error: "el usuario no existe" });
-  req.user = user;
+  if (!email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and password are not required",
+    });
+  }
   next();
 }

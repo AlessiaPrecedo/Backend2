@@ -5,8 +5,10 @@ import usersRoutes from "./routes/user.route.js";
 import eventsRoutes from "./routes/event.route.js";
 import ticketsRoutes from "./routes/ticket.route.js";
 import registerRouter from "./api/sessions/register.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 app.use("/users", usersRoutes);
 app.use("/events", eventsRoutes);
