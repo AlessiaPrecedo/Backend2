@@ -13,7 +13,9 @@ export function auth(req, res, next) {
 
       return res.status(401).json({
         status: "error",
-        message: isTokenError ? "Token inválido o expirado" : "No autenticado",
+        message: isTokenError
+          ? "Invalid or expired token"
+          : "Not authenticated",
       });
     }
 

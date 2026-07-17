@@ -4,7 +4,7 @@ export function validateLoginFields(req, res, next) {
   if (!email || !password) {
     return res.status(400).json({
       status: "error",
-      message: "Email and password are not required",
+      message: "Email and password are required",
     });
   }
   next();

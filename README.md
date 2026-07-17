@@ -1,4 +1,4 @@
-# Backend2 — Registro seguro de usuarios
+# Backend2 — Registro y autenticación con Passport.js
 
 ## Requisitos
 
@@ -15,13 +15,7 @@ npm install
 
 ## Variables de entorno
 
-PORT=8080
-NODE_ENV= development
-MONGO_URL=mongodb://localhost:27017/backend2
-JWT_SECRET= Lacontraseñalol
-COOKIE_SECRET=contraseñapoderosa
-JWT_EXPIRES_IN=1h
-SALT_ROUNDS=10
+Copiá el archivo de ejemplo y completá los valores:
 
 ```bash
 cp .env.example .env
@@ -45,15 +39,43 @@ npm run dev
 npm start
 ```
 
+## Tests automatizados
+
+```bash
+npm test
+```
+
+Corre con el test runner nativo de Node (`node:test`, sin dependencias extra) y cubre: hash de contraseñas, generación/verificación de JWT (incluye token manipulado y expirado), el middleware `validateLoginFields`, y el middleware `auth` (que internamente usa la estrategia `current` de Passport). No incluye tests de integración contra una base de datos real.
+
 ## Arquitectura en capas
 
-| Capa           | Responsabilidad                                                |
-| -------------- | -------------------------------------------------------------- |
-| **Route**      | Define el endpoint y aplica middlewares                        |
-| **Controller** | Recibe el request HTTP, llama al service, devuelve la response |
-| **Service**    | Contiene la lógica de negocio (validaciones, hash, reglas)     |
-| **Repository** | Único punto de contacto con la base de datos                   |
-| **Utils**      | Helpers reutilizables (bcrypt, etc.)                           |
+| Capa                  | Responsabilidad                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Route**             | Define el endpoint y aplica middlewares                                                                                         |
+| **Controller**        | Recibe el request HTTP, dispara la estrategia de Passport correspondiente, y genera el JWT / setea la cookie cuando corresponde |
+| **Passport strategy** | Contiene la lógica de autenticación (validaciones, hash, reglas de negocio de login/registro)                                   |
+| **Repository**        | Único punto de contacto con la base de datos                                                                                    |
+| **Utils**             | Helpers reutilizables (bcrypt, JWT, errores)                                                                                    |
+
+## Autenticación con Passport.js
+
+Toda la autenticación pasa por **estrategias de Passport**, centralizadas en `src/config/passport.js`. `app.js` solo llama a `initializePassport()` y a `passport.initialize()`; no define ninguna estrategia ahí.
+
+| Estrategia | Tipo                                               | Qué hace                                                                                                                                                                   |
+| ---------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `register` | `passport-local` (con `passReqToCallback`)         | Valida los campos, normaliza el email, verifica que no exista otro usuario con ese email, hashea la contraseña con bcrypt y crea el usuario con `role: "user"` por defecto |
+| `login`    | `passport-local`                                   | Busca el usuario por email y compara la contraseña con bcrypt. Si algo no coincide, devuelve `done(null, false)` sin indicar cuál fue el problema                          |
+| `current`  | `passport-jwt` (con extractor custom desde cookie) | Lee el JWT de la cookie `currentUser`, lo verifica, y deja el payload decodificado en `req.user`                                                                           |
+
+Puntos importantes:
+
+- El **JWT se genera en el controller** (`controllers/session.controller.js`), nunca dentro de una estrategia. La estrategia `login` solo confirma la identidad del usuario.
+- La cookie `currentUser` se setea con `httpOnly: true`, `sameSite: "lax"`, `maxAge: 3600000` y `secure` solo si `NODE_ENV=production`.
+- `POST /api/sessions/logout` no pasa por Passport: solo borra la cookie.
+
+### Preparado para providers externos (Google, GitHub, etc.)
+
+`passport.js` está pensado para crecer sin tocar `app.js` ni las rutas: agregar un login social es sumar un nuevo `passport.use("google", new GoogleStrategy(...))` dentro de `initializePassport()`, y una ruta nueva que apunte a esa estrategia. El resto de la app (cookie, JWT, middleware `auth`) no cambia.
 
 ## Endpoints
 
@@ -100,6 +122,8 @@ npm start
 
 **POST** `/api/sessions/register`
 
+Delega en la estrategia `register` de Passport.
+
 ### Body (JSON)
 
 ```json
@@ -115,7 +139,8 @@ npm start
 
 ```json
 {
-  "user": {
+  "status": "success",
+  "payload": {
     "_id": "664f...",
     "first_name": "Kenny",
     "last_name": "Test",
@@ -127,7 +152,7 @@ npm start
 
 > La contraseña no se devuelve en la respuesta, ni en texto plano ni hasheada.
 
-## Casos de prueba
+### Casos de prueba
 
 | Caso                | Body                          | Respuesta esperada                                |
 | ------------------- | ----------------------------- | ------------------------------------------------- |
@@ -140,6 +165,8 @@ npm start
 ## Endpoint: Login
 
 **POST** `/api/sessions/login`
+
+Valida presencia de campos con `validateLoginFields`, y delega en la estrategia `login` de Passport. El JWT lo genera el controller una vez que Passport confirma la identidad.
 
 ### Body (JSON)
 
@@ -155,7 +182,7 @@ npm start
 ```json
 {
   "status": "success",
-  "message": "Login exitoso"
+  "message": "Login correcto"
 }
 ```
 
@@ -170,30 +197,35 @@ Además de la respuesta, se setea una cookie `currentUser` (`httpOnly`, `sameSit
 ### Respuesta de error `401` (email inexistente o password incorrecta — mismo mensaje en ambos casos)
 
 ```json
-{ "status": "error", "message": "Credenciales inválidas" }
+{ "status": "error", "message": "Invalid credentials" }
 ```
 
 ## Endpoint: Usuario actual
 
 **GET** `/api/sessions/current`
 
-Requiere la cookie `currentUser` (se envía automáticamente por el navegador tras el login).
+Protegida por el middleware `auth`, que usa la estrategia `current` de Passport para leer y validar el JWT desde la cookie `currentUser` (se envía automáticamente por el navegador tras el login).
 
 ### Respuesta exitosa `200`
 
 ```json
 {
-  "id": "664f...",
-  "email": "kenny@test.com",
-  "role": "user"
+  "status": "success",
+  "payload": {
+    "id": "664f...",
+    "email": "kenny@test.com",
+    "role": "user"
+  }
 }
 ```
 
-### Respuesta de error `401` (sin cookie, o token inválido/expirado)
+### Respuesta de error `401` (sin cookie)
 
 ```json
 { "status": "error", "message": "No autenticado" }
 ```
+
+### Respuesta de error `401` (token inválido o expirado)
 
 ```json
 { "status": "error", "message": "Token inválido o expirado" }
@@ -203,7 +235,7 @@ Requiere la cookie `currentUser` (se envía automáticamente por el navegador tr
 
 **POST** `/api/sessions/logout`
 
-Elimina la cookie `currentUser`.
+Elimina la cookie `currentUser`. No pasa por Passport.
 
 ### Respuesta exitosa `200`
 
@@ -213,17 +245,19 @@ Elimina la cookie `currentUser`.
 
 ## Casos de prueba — Sesión
 
-| Caso                                     | Request                         | Respuesta esperada                   |
-| ---------------------------------------- | ------------------------------- | ------------------------------------ |
-| Login exitoso                            | Email y password correctos      | `200` + cookie `currentUser` seteada |
-| Email inexistente                        | Email que no existe             | `401` "Credenciales inválidas"       |
-| Password incorrecta                      | Email correcto, password mal    | `401` "Credenciales inválidas"       |
-| `/current` sin cookie                    | Sin header `Cookie`             | `401` "No autenticado"               |
-| `/current` con token manipulado/expirado | Cookie alterada o vencida       | `401` "Token inválido o expirado"    |
-| Logout → `/current`                      | Logout y luego pedir `/current` | `401` "No autenticado"               |
+| Caso                                                | Request                      | Respuesta esperada                                     |
+| --------------------------------------------------- | ---------------------------- | ------------------------------------------------------ |
+| Registro → login → `/current` → logout → `/current` | Flujo completo               | `201` → `200` + cookie → `200` payload → `200` → `401` |
+| Registro con email duplicado                        | Mismo email dos veces        | `400` "User already exists"                            |
+| Login con email inexistente                         | Email que no existe          | `401` "Invalid credentials"                            |
+| Login con password incorrecta                       | Email correcto, password mal | `401` "Invalid credentials"                            |
+| `/current` sin cookie                               | Sin header `Cookie`          | `401` "No autenticado"                                 |
+| `/current` con token manipulado/expirado            | Cookie alterada o vencida    | `401` "Token inválido o expirado"                      |
 
 ## Seguridad
 
 - La contraseña se hashea con `bcrypt` antes de guardarse en MongoDB
 - El `role` no puede manipularse desde el body; siempre se asigna `user` por defecto
 - El email se normaliza (trim + lowercase) antes de guardarse
+- El JWT nunca incluye la contraseña en su payload
+- La cookie del JWT es `httpOnly`, por lo que no es accesible desde JavaScript del navegador

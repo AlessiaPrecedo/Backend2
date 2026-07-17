@@ -17,7 +17,7 @@ export function register(req, res, next) {
     if (!user) {
       return res
         .status(400)
-        .json({ status: "error", message: "No se pudo registrar el usuario" });
+        .json({ status: "error", message: "Failed to register user" });
     }
 
     const { password, ...userWithoutPassword } = user.toObject();
@@ -34,7 +34,7 @@ export function login(req, res, next) {
     if (!user) {
       return res
         .status(401)
-        .json({ status: "error", message: "Credentials invalid" });
+        .json({ status: "error", message: "Invalid credentials" });
     }
 
     const token = generateToken({
@@ -50,7 +50,7 @@ export function login(req, res, next) {
       secure: env.NODE_ENV === "production",
     });
 
-    res.status(200).json({ status: "success", message: "Login correcto" });
+    res.status(200).json({ status: "success", message: "Correct login" });
   })(req, res, next);
 }
 
@@ -61,5 +61,5 @@ export function current(req, res) {
 
 export function logout(req, res) {
   res.clearCookie("currentUser");
-  res.status(200).json({ status: "success", message: "Logout exitoso" });
+  res.status(200).json({ status: "success", message: "Logout successful" });
 }
