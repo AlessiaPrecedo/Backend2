@@ -1,5 +1,3 @@
-import { UserModel } from "../models/user.model.js";
-
 export function validateLoginFields(req, res, next) {
   const { email, password } = req.body;
 

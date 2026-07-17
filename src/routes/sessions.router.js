@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { validateLoginFields } from "../../middlewares/session.middleware.js";
-import { auth } from "../../middlewares/auth.middleware.js";
+import passport from "passport";
+import { validateLoginFields } from "../middlewares/session.middleware.js";
+import { auth } from "../middlewares/auth.middleware.js";
 import {
-  login,
   register,
+  login,
   current,
   logout,
-} from "../../controllers/session.controller.js";
+} from "../controllers/session.controller.js";
 
 const router = Router();
 

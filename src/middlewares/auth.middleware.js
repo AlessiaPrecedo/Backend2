@@ -1,16 +1,23 @@
-import { verifyToken } from "../utils/jwt.js";
+import passport from "passport";
 
 export function auth(req, res, next) {
-  const token = req.cookies?.currentUser;
-  if (!token) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" });
-  }
+  passport.authenticate("current", { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
 
-  try {
-    const decoded = verifyToken(token);
-    req.user = decoded;
+    if (!user) {
+      const isTokenError =
+        info?.name === "TokenExpiredError" ||
+        info?.name === "JsonWebTokenError";
+
+      return res.status(401).json({
+        status: "error",
+        message: isTokenError ? "Token inválido o expirado" : "No autenticado",
+      });
+    }
+
+    req.user = user;
     next();
-  } catch (error) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" });
-  }
+  })(req, res, next);
 }
