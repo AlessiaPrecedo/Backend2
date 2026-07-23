@@ -39,7 +39,7 @@ test("responde 401 'No autenticado' si no hay cookie", async () => {
   await res._done;
 
   assert.equal(res.statusCode, 401);
-  assert.equal(res.body.message, "No autenticado");
+  assert.equal(res.body.message, "Not authenticated");
 });
 
 test("responde 401 'Token inválido o expirado' con un token roto", async () => {
@@ -50,7 +50,7 @@ test("responde 401 'Token inválido o expirado' con un token roto", async () => 
   await res._done;
 
   assert.equal(res.statusCode, 401);
-  assert.equal(res.body.message, "Token inválido o expirado");
+  assert.equal(res.body.message, "Invalid or expired token");
 });
 
 test("llama a next() y setea req.user con un token válido", async () => {

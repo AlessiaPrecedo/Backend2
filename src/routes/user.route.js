@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.get("/", getUsers);
+router.get("/", auth, authorize("admin"), getUsers);
 router.get("/:id", getUserById);
 router.post("/", createUser);
 router.put("/:id", updateUser);

@@ -23,16 +23,47 @@ export const getEventsById = async (req, res) => {
 
 export const createEvent = async (req, res) => {
   try {
-    const event = await eventService.createEvent(req.body);
-    res.status(201).json({ status: "success", data: event });
+    const { title, description, category, date, location, capacity, price } =
+      req.body;
+
+    const event = await eventService.createEvent({
+      title,
+      description,
+      category,
+      date,
+      location,
+      capacity,
+      price,
+      organizer: req.user.id, // nunca del body: evita que alguien se asigne otro dueño
+    });
+
+    res.status(201).json({
+      status: "success",
+      payload: {
+        id: event._id,
+        title: event.title,
+        organizer: event.organizer,
+      },
+    });
   } catch (error) {
     const statusCode = error.message.includes("It already exists.") ? 400 : 500;
     res.status(statusCode).json({ status: "error", message: error.message });
   }
 };
 
+
 export const updateEvent = async (req, res) => {
   try {
+    const existingEvent = await eventService.getEventById(req.params.id);
+
+    const isOwner = existingEvent.organizer.toString() === req.user.id;
+    if (req.user.role !== "admin" && !isOwner) {
+      return res.status(403).json({
+        status: "error",
+        message: "You can only modify your own events",
+      });
+    }
+
     const event = await eventService.updateEvent(req.params.id, req.body);
     res.json({ status: "success", data: event });
   } catch (error) {
@@ -43,6 +74,16 @@ export const updateEvent = async (req, res) => {
 
 export const deleteEvent = async (req, res) => {
   try {
+    const existingEvent = await eventService.getEventById(req.params.id);
+
+    const isOwner = existingEvent.organizer.toString() === req.user.id;
+    if (req.user.role !== "admin" && !isOwner) {
+      return res.status(403).json({
+        status: "error",
+        message: "You can only delete your own events",
+      });
+    }
+
     const result = await eventService.deleteEvent(req.params.id);
     res.json({ status: "success", data: result });
   } catch (error) {

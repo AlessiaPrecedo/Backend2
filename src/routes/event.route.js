@@ -6,14 +6,17 @@ import {
   updateEvent,
   deleteEvent,
 } from "../controllers/event.controller.js";
+import { auth } from "../middlewares/auth.middleware.js";
+import { authorize } from "../middlewares/authorize.middleware.js";
 
 const router = Router();
 
 router.get("/", getEvents);
-router.post("/", createEvent);
 router.get("/:id", getEventsById);
-router.put("/:id", updateEvent);
-router.delete("/:id", deleteEvent);
+router.post("/", auth, authorize("organizer", "admin"), createEvent);
+router.put("/:id", auth, authorize("organizer", "admin"), updateEvent);
+router.delete("/:id", auth, authorize("organizer", "admin"), deleteEvent);
+
 
 export default router;
 
