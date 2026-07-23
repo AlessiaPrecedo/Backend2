@@ -254,6 +254,50 @@ Elimina la cookie `currentUser`. No pasa por Passport.
 | `/current` sin cookie                               | Sin header `Cookie`          | `401` "No autenticado"                                 |
 | `/current` con token manipulado/expirado            | Cookie alterada o vencida    | `401` "Token inválido o expirado"                      |
 
+## Roles y autorización
+
+### Roles
+
+`role` vive en el modelo `User`, con 3 valores posibles: `user` (default), `organizer`, `admin`. El registro público (`POST /api/sessions/register`) **siempre** asigna `role: "user"`, sin importar qué venga en el body — así nadie puede autoasignarse `admin` u `organizer`.
+
+### Matriz de permisos
+
+| Acción                             | user | organizer | admin |
+| ----------------------------------- | :--: | :-------: | :---: |
+| Consultar eventos publicados         |  ✅  |    ✅     |  ✅   |
+| Crear eventos                        |  ❌  |    ✅     |  ✅   |
+| Modificar/cancelar eventos propios   |  ❌  |    ✅     |  ✅   |
+| Modificar cualquier evento            |  ❌  |    ❌     |  ✅   |
+| Ver todos los usuarios               |  ❌  |    ❌     |  ✅   |
+
+### 401 vs 403
+
+- **401 (No autenticado)**: no hay cookie, o el JWT es inválido/expiró. No sabemos quién sos. Lo maneja el middleware `auth`.
+- **403 (Prohibido)**: sabemos quién sos (JWT válido), pero tu `role` no tiene permiso para esa acción. Lo maneja el middleware `authorize`.
+
+### Middlewares
+
+| Middleware | Archivo | Qué hace |
+| ---------- | ------- | -------- |
+| `auth` | `middlewares/auth.middleware.js` | Valida el JWT de la cookie `currentUser` (vía la estrategia `current` de Passport). Responde 401 si no hay sesión válida y deja el usuario en `req.user` |
+| `authorize(...roles)` | `middlewares/authorize.middleware.js` | Recibe los roles permitidos como parámetro y los compara contra `req.user.role`. Responde 403 si no coincide |
+
+Siempre se usan en ese orden: `auth` primero (saber quién sos), `authorize` después (ver si te corresponde).
+
+### Rutas protegidas
+
+| Método | Ruta               | Protección                              |
+| ------ | ------------------ | ------------------------------------------ |
+| GET    | `/api/sessions/current` | `auth` (cualquier usuario autenticado) |
+| POST   | `/events`          | `auth` + `authorize("organizer","admin")` |
+| PUT    | `/events/:id`      | `auth` + `authorize("organizer","admin")` + dueño del evento (o admin) |
+| DELETE | `/events/:id`      | `auth` + `authorize("organizer","admin")` + dueño del evento (o admin) |
+| GET    | `/users`           | `auth` + `authorize("admin")` |
+
+### Propiedad de recursos
+
+Al crear un evento, el `organizer` se toma de `req.user.id` (nunca del body). Al modificar o borrar un evento, si `req.user.role !== "admin"`, se valida que `event.organizer` coincida con `req.user.id`; si no, `403`.
+
 ## Seguridad
 
 - La contraseña se hashea con `bcrypt` antes de guardarse en MongoDB
